@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 
 public class Socks5 extends SocksBase {
 
@@ -77,100 +78,14 @@ public class Socks5 extends SocksBase {
     @Override
     public void connect()throws IOException {
         try{
-            InetAddress address = null;
+            Socket socket = new Socket();
+            socket.connect(address);
 
-
-
-
-            /*
-            switch(atype){
-                case DOMAIN:
-
-                    break;
-
-                default:
-                    address = InetAddress.getByAddress(this.address);
-                    break;
-            }
-
-            if(address == null){
-                return;
-            }
-
-            InetAddress b = address;
-
-
-            List<Node> nodes = proxy.getKademlia().getRoutingTable().getAllNodes();
-            if(nodes.size() < 3){
-                replyCommand(ReplyCode.GENERAL_FAILURE);
-                throw new IOException("Not enough nodes to relay off of.");
-            }
-
-            Collections.shuffle(nodes);
-
-
-            GetPortRequest request = new GetPortRequest();
-            request.setDestination(nodes.get(0).getAddress());
-            proxy.getKademlia().getServer().send(request, new ResponseCallback(){
-                @Override
-                public void onResponse(ResponseEvent event){
-                    GetPortResponse response = (GetPortResponse) event.getMessage();
-
-                    Tunnel tunnel = new Tunnel();
-                    try{
-                        tunnel.connect((SecureNode) nodes.get(0), response.getPort()); //ENTRY
-                        tunnel.relay((SecureNode) nodes.get(1));
-                        tunnel.relay((SecureNode) nodes.get(2));
-                        tunnel.exit(new InetSocketAddress(b, port));
-
-                        replyCommand(ReplyCode.GRANTED);
-
-                    }catch(Exception e){
-                        try{
-                            replyCommand(ReplyCode.HOST_UNREACHABLE);//, address);
-                            proxy.getSocket().close();
-
-                        }catch(IOException ex){
-                        }
-                        return;
-                    }
-
-                    try{
-                        System.out.println(
-                                nodes.get(0).getUID()+" > "+
-                                nodes.get(1).getUID()+" > "+
-                                nodes.get(2).getUID()+" > "+
-                                new String(Socks5.this.address)+" > "+b.getHostAddress()+" : "+port);
-                        relay(tunnel);
-
-                    }catch(Exception e){
-                    }
-                }
-
-                @Override
-                public void onErrorResponse(ErrorResponseEvent event){
-                    try{
-                        System.out.println("ERROR - GET_PORT");
-                        replyCommand(ReplyCode.GENERAL_FAILURE);//, address);
-                        proxy.getSocket().close();
-
-                    }catch(IOException e){
-                    }
-                }
-
-                @Override
-                public void onStalled(StalledEvent event){
-                    try{
-                        System.out.println("Stalled - GET_PORT");
-                        replyCommand(ReplyCode.GENERAL_FAILURE);//, address);
-                        proxy.getSocket().close();
-
-                    }catch(IOException e){
-                    }
-                }
-            });
-            */
+            replyCommand(ReplyCode.GRANTED);
+            
         }catch(IOException e){
+            replyCommand(ReplyCode.HOST_UNREACHABLE);
+            throw new IOException("Unable to connect to server.");
         }
     }
 
