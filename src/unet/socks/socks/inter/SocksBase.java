@@ -5,14 +5,17 @@ import unet.socks.SocksProxy;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 
 public abstract class SocksBase {
 
     protected SocksProxy proxy;
-    protected AType atype;
-    protected byte[] address;
-    protected int port;
+    //protected AType atype;
+    protected InetSocketAddress address;
+    //protected byte[] address;
+    //protected int port;
 
     public SocksBase(SocksProxy proxy){
         this.proxy = proxy;
