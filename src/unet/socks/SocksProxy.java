@@ -83,32 +83,15 @@ public class SocksProxy implements Runnable {
             public void run(){
                 try{
                     transfer(in, socket.getOutputStream());
-                    //while(!socket.isClosed() && !relay.isClosed()){
-                    //    in.transferTo(relay.getOutputStream());
-                    //}
                 }catch(IOException e){
-                    //e.printStackTrace();
                 }
-
-                /*
-                if(complete){
-                    try{
-                        tunnel.close();
-                        proxy.getSocket().close();
-                    }catch(IOException e){
-                    }
-                    return;
-                }
-                complete = true;
-                */
             }
-        });//.start();
+        });
         thread.start();
 
         try{
             transfer(socket.getInputStream(), out);
         }catch(IOException e){
-            //e.printStackTrace();
         }
 
         try{
@@ -117,25 +100,9 @@ public class SocksProxy implements Runnable {
             e.printStackTrace();
         }
 
-        //this.socket.getInputStream().close();
-        //this.socket.getOutputStream().close();
-        //socket.close();
-        //this.socket.close();
-
         in.close();
         out.close();
         socket.close();
-
-        //while(!relay.isClosed() && !socket.isClosed()){
-        //    relay.getInputStream().transferTo(out);
-        //}
-        /*
-        if(complete){
-            tunnel.close();
-            proxy.getSocket().close();
-            return;
-        }
-        complete = true;*/
     }
 
     private void transfer(InputStream in, OutputStream out)throws IOException {
@@ -145,10 +112,6 @@ public class SocksProxy implements Runnable {
             out.write(buf, 0, len);
             out.flush();
         }
-
-        //out.flush();
-        //in.close();
-        //out.close();
     }
 
     public Socket getSocket(){
