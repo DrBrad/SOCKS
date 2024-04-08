@@ -121,6 +121,20 @@ public class Socks5 extends SocksBase {
 
             DatagramPacket packet = new DatagramPacket(new byte[65535], 65535);
             socket.receive(packet);
+            InetAddress clientAddress = packet.getAddress();
+            int clientPort = packet.getPort();
+
+            //SEND TO SERVER
+            packet.setAddress(address.getAddress());
+            packet.setPort(address.getPort());
+            socket.send(packet);
+
+            //RECEIVE FROM SERVER...
+            socket.receive(packet);
+
+            packet.setAddress(clientAddress);
+            packet.setPort(clientPort);
+            socket.send(packet);
 
             System.out.println(packet.getLength()+"  DG PACKET RECEIVED...");
 
