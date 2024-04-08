@@ -72,6 +72,8 @@ public class Socks5 extends SocksBase {
                 throw new IOException("Invalid A-Type.");
         }
 
+        System.out.println(address.getAddress().getHostAddress()+"  "+address.getPort());
+
         return command;
     }
 
@@ -81,12 +83,15 @@ public class Socks5 extends SocksBase {
             Socket socket = new Socket();
             socket.connect(address);
 
-            replyCommand(ReplyCode.GRANTED);
+            replyCommand(ReplyCode.GRANTED, address);
 
-            //RELAY
+            try{
+                proxy.relay(socket);
+            }catch(IOException e){
+            }
 
         }catch(IOException e){
-            replyCommand(ReplyCode.HOST_UNREACHABLE);
+            replyCommand(ReplyCode.HOST_UNREACHABLE, address);
             throw new IOException("Unable to connect to server.");
         }
     }

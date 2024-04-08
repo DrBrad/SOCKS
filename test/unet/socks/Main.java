@@ -5,7 +5,7 @@ import java.io.IOException;
 public class Main {
 
     public static void main(String[] args)throws IOException {
-        SocksProxyServer server = new SocksProxyServer();
+        SocksServer server = new SocksServer();
         server.start(8080);
     }
 }
