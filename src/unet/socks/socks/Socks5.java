@@ -79,21 +79,18 @@ public class Socks5 extends SocksBase {
 
     @Override
     public void connect()throws IOException {
+        Socket socket;
         try{
-            Socket socket = new Socket();
+            socket = new Socket();
             socket.connect(address);
-
-            replyCommand(ReplyCode.GRANTED, address);
-
-            try{
-                proxy.relay(socket);
-            }catch(IOException e){
-            }
 
         }catch(IOException e){
             replyCommand(ReplyCode.HOST_UNREACHABLE, address);
             throw new IOException("Unable to connect to server.");
         }
+
+        replyCommand(ReplyCode.GRANTED, address);
+        proxy.relay(socket);
     }
 
     @Override
