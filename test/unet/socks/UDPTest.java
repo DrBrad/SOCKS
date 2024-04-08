@@ -2,6 +2,7 @@ package unet.socks;
 
 import unet.socks.socks.inter.AType;
 import unet.socks.socks.inter.ReplyCode;
+import unet.socks.socks.udp.MessageBase;
 
 import java.io.*;
 import java.net.*;
@@ -87,7 +88,7 @@ public class UDPTest {
 
 
 
-        byte[] dnsBuffer = constructQueryPacket((short) new Random().nextInt(65535), "google.com");
+        //byte[] dnsBuffer = constructQueryPacket((short) new Random().nextInt(65535), "google.com");
 
 
         /*
@@ -108,7 +109,6 @@ public class UDPTest {
         UB[5 + IABuf.length] = (byte) ((DGport) & 0xFF);
         System.arraycopy(DGPack, 0, UB, 6 + IABuf.length, DataLen);
         System.arraycopy(UB, 0, DGPack, 0, NewPackLen);
-        */
 
         byte[] header = replyCommand(new InetSocketAddress(address, port));
 
@@ -116,6 +116,7 @@ public class UDPTest {
         System.arraycopy(header, 0, pack, 0, header.length);
         System.arraycopy(dnsBuffer, 0, pack, header.length, dnsBuffer.length);
 
+        */
 
         /*
         out.write(pack);
@@ -135,11 +136,28 @@ public class UDPTest {
         */
 
         DatagramSocket dgsocket = new DatagramSocket();
+
+        MessageBase message = new MessageBase(new InetSocketAddress(address, port), constructQueryPacket((short) new Random().nextInt(65535), "google.com"));
+        byte[] data = message.encode();
+        DatagramPacket packet = new DatagramPacket(data, data.length, localEndpoint.getAddress(), localEndpoint.getPort());
+        dgsocket.send(packet);
+
+        dgsocket.receive(packet);
+        message = new MessageBase();
+        message.decode(packet.getData(), packet.getOffset(), packet.getLength());
+
+        data = message.getData();
+        for (int i = 0; i < data.length; i++) {
+            System.out.print(String.format("%02X ", data[i]));
+        }
+
+
         // UDP client socket
         // Send a UDP packet to the SOCKS5 server
         //byte[] requestData = new byte[] { 0x05, 0x01, 0x00 };
-        //byte[] buf = constructQueryPacket((short) new Random().nextInt(65535), "google.com");
+        //
 
+        /*
         DatagramPacket requestPacket = new DatagramPacket(pack, pack.length, localEndpoint.getAddress(), localEndpoint.getPort());
         dgsocket.send(requestPacket);
         System.out.println("Request sent to the SOCKS5 server.");
@@ -172,7 +190,21 @@ public class UDPTest {
         for (int i = offset; i < responseLength; i++) {
             System.out.print(String.format("%02X ", responseData[i]));
         }
+        */
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     private static byte[] replyCommand(InetSocketAddress address)throws IOException {
         byte[] reply = new byte[6+address.getAddress().getAddress().length];
