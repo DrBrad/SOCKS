@@ -6,6 +6,6 @@ public class Main {
 
     public static void main(String[] args)throws IOException {
         SocksServer server = new SocksServer();
-        server.start(8080);
+        server.start(1080);
     }
 }

@@ -6,10 +6,7 @@ import unet.socks.socks.inter.ReplyCode;
 import unet.socks.socks.inter.SocksBase;
 
 import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
+import java.net.*;
 
 public class Socks5 extends SocksBase {
 
@@ -116,7 +113,20 @@ public class Socks5 extends SocksBase {
     }
 
     public void udp()throws IOException {
+        try{
+            DatagramSocket socket = new DatagramSocket();
+            replyCommand(ReplyCode.GRANTED, new InetSocketAddress(socket.getLocalAddress(), socket.getLocalPort())); //REPLACE WITH EXTERNAL IP...
 
+            System.out.println(socket.getLocalAddress()+"  "+socket.getLocalPort());
+
+            DatagramPacket packet = new DatagramPacket(new byte[65535], 65535);
+            socket.receive(packet);
+
+            System.out.println(packet.getLength()+"  DG PACKET RECEIVED...");
+
+        }catch(IOException e){
+            replyCommand(ReplyCode.CONNECTION_NOT_ALLOWED);
+        }
     }
 
     private boolean authenticate()throws IOException {
