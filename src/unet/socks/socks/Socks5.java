@@ -43,6 +43,7 @@ public class Socks5 extends SocksBase {
 
         switch(atype){
             case IPv4:
+            case IPv6:
                 addr = new byte[atype.getLength()];
                 proxy.getInputStream().read(addr);
                 address = new InetSocketAddress(InetAddress.getByAddress(addr),
@@ -53,13 +54,6 @@ public class Socks5 extends SocksBase {
                 addr = new byte[proxy.getInputStream().read()];
                 proxy.getInputStream().read(addr);
                 address = new InetSocketAddress(InetAddress.getByName(new String(addr)),
-                        ((proxy.getInputStream().read() & 0xff) << 8) | (proxy.getInputStream().read() & 0xff));
-                break;
-
-            case IPv6:
-                addr = new byte[atype.getLength()];
-                proxy.getInputStream().read(addr);
-                address = new InetSocketAddress(InetAddress.getByAddress(addr),
                         ((proxy.getInputStream().read() & 0xff) << 8) | (proxy.getInputStream().read() & 0xff));
                 break;
 
@@ -124,17 +118,90 @@ public class Socks5 extends SocksBase {
 
             //READ DPG HEADERS
             /*
-            0x00
-            0x00
-            0x00
+            0x00 - RESERVED
+            0x00 - RESERVED
+            0x00 - FRAG
             ATYPE 0x01 ??
             IP_ADDRESS
             PORT
             */
 
-            /*
+            byte[] data = packet.getData();
+            int offset = 4;
+
+            AType atype = AType.getATypeFromCode(data[offset]);
+            byte[] addr;
+            InetSocketAddress address;
+
+            switch(atype){
+                case IPv4:
+                case IPv6:
+                    addr = new byte[atype.getLength()];
+                    System.arraycopy(data, offset, addr, 0, addr.length);
+                    offset += addr.length;
+                    address = new InetSocketAddress(InetAddress.getByAddress(addr),
+                            ((data[offset] & 0xff) << 8) | (data[offset+1] & 0xff));
+                    offset += 2;
+                    break;
+
+                case DOMAIN:
+                    addr = new byte[data[offset+1]];
+                    System.arraycopy(data, offset+1, addr, 0, addr.length);
+                    offset += addr.length+1;
+                    address = new InetSocketAddress(InetAddress.getByAddress(addr),
+                            ((data[offset] & 0xff) << 8) | (data[offset+1] & 0xff));
+                    offset += 2;
+                    break;
+
+                default:
+                    return;
+            }
+
+            System.out.println(address.getAddress()+"  "+address.getPort());
+
+
             InetAddress clientAddress = packet.getAddress();
             int clientPort = packet.getPort();
+
+            packet.setAddress(address.getAddress());
+            packet.setPort(address.getPort());
+            byte[] buf = new byte[packet.getLength()-offset];
+            System.arraycopy(data, offset, buf, 0, buf.length);
+            packet.setData(buf);
+            socket.send(packet);
+
+            socket.receive(packet);
+
+            //ADD DPG HEADERS BACK...
+
+            buf = packet.getData();
+            address = new InetSocketAddress(packet.getAddress(), packet.getPort());
+            addr = address.getAddress().getAddress();
+            byte[] header = new byte[addr.length+6];
+            header[0] = 0x00;
+            header[1] = 0x00;
+            header[2] = 0x00;
+            header[3] = (packet.getAddress() instanceof Inet4Address) ? AType.IPv4.getCode() : AType.IPv6.getCode();
+
+            System.arraycopy(addr, 0, header, 4, addr.length);
+            header[header.length-2] = (byte) ((address.getPort() & 0xff00) >> 8);
+            header[header.length-1] = (byte) (address.getPort() & 0x00ff);
+
+            data = new byte[header.length+packet.getLength()];
+            System.arraycopy(header, 0, data, 0, header.length);
+            System.arraycopy(buf, 0, data, header.length, packet.getLength());
+
+            System.out.println(header.length);
+
+            packet.setAddress(clientAddress);
+            packet.setPort(clientPort);
+            packet.setData(data);
+            socket.send(packet);
+
+
+
+
+            /*
 
             //SEND TO SERVER
             packet.setAddress(address.getAddress());
@@ -152,6 +219,7 @@ public class Socks5 extends SocksBase {
             */
 
         }catch(IOException e){
+            e.printStackTrace();
             replyCommand(ReplyCode.CONNECTION_NOT_ALLOWED);
         }
     }
@@ -186,8 +254,8 @@ public class Socks5 extends SocksBase {
         reply[2] = 0x00;
         reply[3] = (address.getAddress() instanceof Inet4Address) ? AType.IPv4.getCode() : AType.IPv6.getCode();
         System.arraycopy(address.getAddress().getAddress(), 0, reply, 4, reply.length-6);
-        reply[reply.length-2] = (byte)((address.getPort() & 0xff00) >> 8);
-        reply[reply.length-1] = (byte)(address.getPort() & 0x00ff);
+        reply[reply.length-2] = (byte) ((address.getPort() & 0xff00) >> 8);
+        reply[reply.length-1] = (byte) (address.getPort() & 0x00ff);
 
         proxy.getOutputStream().write(reply);
     }

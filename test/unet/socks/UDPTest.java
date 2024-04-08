@@ -164,6 +164,7 @@ public class UDPTest {
                 break;
         }
 
+        System.out.println(offset);
         System.out.println("Response received from the SOCKS5 server:");
 
         // Display the response data
