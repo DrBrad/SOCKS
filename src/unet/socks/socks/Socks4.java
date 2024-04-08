@@ -8,6 +8,8 @@ import java.io.IOException;
 
 public class Socks4 extends SocksBase {
 
+    public static final byte SOCKS_VERSION = 0x04;
+
     public Socks4(SocksProxy proxy){
         super(proxy);
     }

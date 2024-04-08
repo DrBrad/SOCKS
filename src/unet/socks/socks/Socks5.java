@@ -82,7 +82,9 @@ public class Socks5 extends SocksBase {
             socket.connect(address);
 
             replyCommand(ReplyCode.GRANTED);
-            
+
+            //RELAY
+
         }catch(IOException e){
             replyCommand(ReplyCode.HOST_UNREACHABLE);
             throw new IOException("Unable to connect to server.");
