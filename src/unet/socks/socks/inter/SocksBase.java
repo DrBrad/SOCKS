@@ -1,23 +1,19 @@
 package unet.socks.socks.inter;
 
-import unet.socks.SocksProxy;
+import unet.socks.socks.ProxyHandler;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 
 public abstract class SocksBase {
 
-    protected SocksProxy proxy;
+    protected ProxyHandler proxy;
     //protected AType atype;
     protected InetSocketAddress address;
     //protected byte[] address;
     //protected int port;
 
-    public SocksBase(SocksProxy proxy){
+    public SocksBase(ProxyHandler proxy){
         this.proxy = proxy;
     }
 

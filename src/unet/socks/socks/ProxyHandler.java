@@ -1,4 +1,4 @@
-package unet.socks;
+package unet.socks.socks;
 
 import unet.socks.socks.Socks4;
 import unet.socks.socks.Socks5;
@@ -9,13 +9,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
-public class SocksProxy implements Runnable {
+public class ProxyHandler implements Runnable {
 
     private Socket socket;
     private InputStream in;
     private OutputStream out;
 
-    public SocksProxy(Socket socket){
+    public ProxyHandler(Socket socket){
         this.socket = socket;
     }
 
@@ -77,7 +77,7 @@ public class SocksProxy implements Runnable {
         }
     }
 
-    public void relay(Socket socket)throws IOException {
+    protected void relay(Socket socket)throws IOException {
         Thread thread = new Thread(new Runnable(){
             @Override
             public void run(){

@@ -1,5 +1,7 @@
 package unet.socks;
 
+import unet.socks.socks.ProxyHandler;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -21,7 +23,7 @@ public class SocksServer {
                 try{
                     Socket socket;
                     while((socket = server.accept()) != null){
-                        new Thread(new SocksProxy(socket)).start();
+                        new Thread(new ProxyHandler(socket)).start();
                     }
                 }catch(IOException e){
                     e.printStackTrace();

@@ -1,6 +1,5 @@
 package unet.socks.socks;
 
-import unet.socks.SocksProxy;
 import unet.socks.socks.inter.Command;
 import unet.socks.socks.inter.SocksBase;
 
@@ -10,7 +9,7 @@ public class Socks4 extends SocksBase {
 
     public static final byte SOCKS_VERSION = 0x04;
 
-    public Socks4(SocksProxy proxy){
+    public Socks4(ProxyHandler proxy){
         super(proxy);
     }
 

@@ -1,6 +1,5 @@
 package unet.socks.socks;
 
-import unet.socks.SocksProxy;
 import unet.socks.socks.inter.AType;
 import unet.socks.socks.inter.Command;
 import unet.socks.socks.inter.ReplyCode;
@@ -16,7 +15,7 @@ public class Socks5 extends SocksBase {
 
     public static final byte SOCKS_VERSION = 0x05;
 
-    public Socks5(SocksProxy proxy){
+    public Socks5(ProxyHandler proxy){
         super(proxy);
     }
 
