@@ -121,6 +121,18 @@ public class Socks5 extends SocksBase {
 
             DatagramPacket packet = new DatagramPacket(new byte[65535], 65535);
             socket.receive(packet);
+
+            //READ DPG HEADERS
+            /*
+            0x00
+            0x00
+            0x00
+            ATYPE 0x01 ??
+            IP_ADDRESS
+            PORT
+            */
+
+            /*
             InetAddress clientAddress = packet.getAddress();
             int clientPort = packet.getPort();
 
@@ -137,6 +149,7 @@ public class Socks5 extends SocksBase {
             socket.send(packet);
 
             System.out.println(packet.getLength()+"  DG PACKET RECEIVED...");
+            */
 
         }catch(IOException e){
             replyCommand(ReplyCode.CONNECTION_NOT_ALLOWED);

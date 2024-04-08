@@ -1,6 +1,7 @@
 package unet.socks;
 
 import unet.socks.socks.inter.AType;
+import unet.socks.socks.inter.ReplyCode;
 
 import java.io.*;
 import java.net.*;
@@ -86,13 +87,60 @@ public class UDPTest {
 
 
 
+        byte[] dnsBuffer = constructQueryPacket((short) new Random().nextInt(65535), "google.com");
+
+
+        /*
+        byte[] IABuf = address.getAddress();
+        int DGport = port;
+        int HeaderLen = 6 + IABuf.length;
+        int DataLen = DGPack.length;
+        int NewPackLen = HeaderLen + DataLen;
+
+        byte[] UB = new byte[NewPackLen];
+
+        UB[0] = (byte) 0x00;    // Reserved 0x00
+        UB[1] = (byte) 0x00;    // Reserved 0x00
+        UB[2] = (byte) 0x00;    // FRAG '00' - Standalone DataGram
+        UB[3] = (byte) 0x01;    // Address Type -->'01'-IP v4
+        System.arraycopy(IABuf, 0, UB, 4, IABuf.length);
+        UB[4 + IABuf.length] = (byte) ((DGport >> 8) & 0xFF);
+        UB[5 + IABuf.length] = (byte) ((DGport) & 0xFF);
+        System.arraycopy(DGPack, 0, UB, 6 + IABuf.length, DataLen);
+        System.arraycopy(UB, 0, DGPack, 0, NewPackLen);
+        */
+
+        byte[] header = replyCommand(new InetSocketAddress(address, port));
+
+        byte[] pack = new byte[header.length+dnsBuffer.length];
+        System.arraycopy(header, 0, pack, 0, header.length);
+        System.arraycopy(dnsBuffer, 0, pack, header.length, dnsBuffer.length);
+
+
+        /*
+        out.write(pack);
+        out.flush();
+
+
+
+
+
+
+        byte[] buf = new byte[4096];
+        int length = in.read(buf);
+
+        for (int i = 0; i < length; i++) {
+            System.out.print(String.format("%02X ", buf[i]));
+        }
+        */
+
         DatagramSocket dgsocket = new DatagramSocket();
         // UDP client socket
         // Send a UDP packet to the SOCKS5 server
         //byte[] requestData = new byte[] { 0x05, 0x01, 0x00 };
-        byte[] buf = constructQueryPacket((short) new Random().nextInt(65535), "google.com");
+        //byte[] buf = constructQueryPacket((short) new Random().nextInt(65535), "google.com");
 
-        DatagramPacket requestPacket = new DatagramPacket(buf, buf.length, localEndpoint.getAddress(), localEndpoint.getPort());
+        DatagramPacket requestPacket = new DatagramPacket(pack, pack.length, localEndpoint.getAddress(), localEndpoint.getPort());
         dgsocket.send(requestPacket);
         System.out.println("Request sent to the SOCKS5 server.");
 
@@ -100,14 +148,47 @@ public class UDPTest {
         byte[] responseData = new byte[65535];
         DatagramPacket responsePacket = new DatagramPacket(responseData, responseData.length);
         dgsocket.receive(responsePacket);
+
+        int offset = 4;
+        switch(AType.getATypeFromCode(responseData[offset])){
+            case IPv4:
+                offset += 6;
+                break;
+
+            case IPv6:
+                offset += 18;
+                break;
+
+            case DOMAIN:
+                offset += responseData[5]+3;
+                break;
+        }
+
         System.out.println("Response received from the SOCKS5 server:");
 
         // Display the response data
         int responseLength = responsePacket.getLength();
-        for (int i = 0; i < responseLength; i++) {
+        for (int i = offset; i < responseLength; i++) {
             System.out.print(String.format("%02X ", responseData[i]));
         }
     }
+
+    private static byte[] replyCommand(InetSocketAddress address)throws IOException {
+        byte[] reply = new byte[6+address.getAddress().getAddress().length];
+
+        reply[0] = 0x00;
+        reply[1] = 0x00;
+        reply[2] = 0x00;
+        reply[3] = (address.getAddress() instanceof Inet4Address) ? AType.IPv4.getCode() : AType.IPv6.getCode();
+        System.arraycopy(address.getAddress().getAddress(), 0, reply, 4, reply.length-6);
+        reply[reply.length-2] = (byte)((address.getPort() & 0xff00) >> 8);
+        reply[reply.length-1] = (byte)(address.getPort() & 0x00ff);
+
+        return reply;
+    }
+
+
+
 
     //DNS UDP TEST...
     private static byte[] constructQueryPacket(short transactionId, String domainName) {
