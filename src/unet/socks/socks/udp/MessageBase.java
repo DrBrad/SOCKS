@@ -56,7 +56,7 @@ public class MessageBase {
     }
 
     public void decode(byte[] buf, int off, int len)throws UnknownHostException {
-        off += 4;
+        off += 3;
 
         AType atype = AType.getATypeFromCode(buf[off]);
         byte[] addr;
@@ -65,15 +65,6 @@ public class MessageBase {
             case IPv4:
             case IPv6:
                 addr = new byte[atype.getLength()];
-                System.arraycopy(buf, off, addr, 0, addr.length);
-                off += addr.length;
-                address = new InetSocketAddress(InetAddress.getByAddress(addr),
-                        ((buf[off] & 0xff) << 8) | (buf[off+1] & 0xff));
-                off += 2;
-                break;
-
-            case DOMAIN:
-                addr = new byte[buf[off+1]];
                 System.arraycopy(buf, off+1, addr, 0, addr.length);
                 off += addr.length+1;
                 address = new InetSocketAddress(InetAddress.getByAddress(addr),
@@ -81,8 +72,17 @@ public class MessageBase {
                 off += 2;
                 break;
 
+            case DOMAIN:
+                addr = new byte[buf[off+1]];
+                System.arraycopy(buf, off+2, addr, 0, addr.length);
+                off += addr.length+2;
+                address = new InetSocketAddress(InetAddress.getByAddress(addr),
+                        ((buf[off] & 0xff) << 8) | (buf[off+1] & 0xff));
+                off += 2;
+                break;
+
             default:
-                return;
+                throw new IllegalArgumentException("Failed to parse packet.");
         }
 
         data = new byte[len-off];

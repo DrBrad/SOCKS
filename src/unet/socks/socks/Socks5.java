@@ -36,8 +36,7 @@ public class Socks5 extends SocksBase {
             replyCommand(ReplyCode.COMMAND_NOT_SUPPORTED);
         }
 
-        //RSV
-        proxy.getInputStream().read();
+        proxy.getInputStream().read(); //RSV
 
         AType atype = AType.getATypeFromCode((byte) proxy.getInputStream().read());
         byte[] addr;
@@ -86,25 +85,21 @@ public class Socks5 extends SocksBase {
 
     @Override
     public void bind()throws IOException {
-        //NOT SURE HOW WE WANT TO HANDLE THIS ONE...
-        /*
         try{
             ServerSocket server = new ServerSocket(0);
             replyCommand(ReplyCode.GRANTED, new InetSocketAddress(InetAddress.getLocalHost(), server.getLocalPort()));
 
-            //DO WE LOOP THIS...?
-            Socket socket ;
-            while((socket = server.accept()) != null){
-                replyCommand(ReplyCode.GRANTED, new InetSocketAddress(socket.getInetAddress(), socket.getPort()));
-                relay(socket);
+            Socket socket = server.accept();
+            if(socket == null){
+                replyCommand(ReplyCode.GENERAL_FAILURE);
             }
 
+            proxy.relay(socket);
             server.close();
 
         }catch(IOException e){
             replyCommand(ReplyCode.CONNECTION_NOT_ALLOWED);
         }
-        */
     }
 
     public void udp()throws IOException {
@@ -115,14 +110,18 @@ public class Socks5 extends SocksBase {
             DatagramPacket packet = new DatagramPacket(new byte[65535], 65535);
             socket.receive(packet);
 
+            if(packet == null){
+                System.out.println("FAIL");
+            }
+
             MessageBase message = new MessageBase();
             message.decode(packet.getData(), packet.getOffset(), packet.getLength());
 
             InetAddress clientAddress = packet.getAddress();
             int clientPort = packet.getPort();
 
-            packet.setAddress(address.getAddress());
-            packet.setPort(address.getPort());
+            packet.setAddress(message.getHostAddress());
+            packet.setPort(message.getPort());
             packet.setData(message.getData());
             socket.send(packet);
 
