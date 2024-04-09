@@ -112,20 +112,8 @@ public class Socks5 extends SocksBase {
             DatagramSocket socket = new DatagramSocket();
             replyCommand(ReplyCode.GRANTED, new InetSocketAddress(socket.getLocalAddress(), socket.getLocalPort())); //REPLACE WITH EXTERNAL IP...
 
-            System.out.println(socket.getLocalAddress()+"  "+socket.getLocalPort());
-
             DatagramPacket packet = new DatagramPacket(new byte[65535], 65535);
             socket.receive(packet);
-
-            //READ DPG HEADERS
-            /*
-            0x00 - RESERVED
-            0x00 - RESERVED
-            0x00 - FRAG
-            ATYPE 0x01 ??
-            IP_ADDRESS
-            PORT
-            */
 
             MessageBase message = new MessageBase();
             message.decode(packet.getData(), packet.getOffset(), packet.getLength());
@@ -140,10 +128,7 @@ public class Socks5 extends SocksBase {
 
             socket.receive(packet);
 
-            byte[] data = new byte[packet.getLength()-packet.getOffset()];
-            System.arraycopy(packet.getData(), packet.getOffset(), data, 0, packet.getLength());
             message = new MessageBase(packet.getAddress(), packet.getPort(), packet.getData());
-            //message.decode(packet.getData(), packet.getOffset(), packet.getLength());
 
             packet.setAddress(clientAddress);
             packet.setPort(clientPort);

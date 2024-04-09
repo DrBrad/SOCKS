@@ -9,6 +9,17 @@ import java.net.UnknownHostException;
 
 public class MessageBase {
 
+
+    //READ DPG HEADERS
+    /*
+    0x00 - RESERVED
+    0x00 - RESERVED
+    0x00 - FRAG
+    ATYPE 0x01 ??
+    IP_ADDRESS
+    PORT
+    */
+
     private byte[] data;
     private InetSocketAddress address;
 
