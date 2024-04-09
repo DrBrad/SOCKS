@@ -111,7 +111,7 @@ public class Socks5 extends SocksBase {
             socket.receive(packet);
 
             if(packet == null){
-                System.out.println("FAIL");
+                throw new IOException("Failed to get packet.");
             }
 
             MessageBase message = new MessageBase();
